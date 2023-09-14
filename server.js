@@ -1,5 +1,6 @@
 const express = require('express')
 const path = require('path');
+const pool = require('./db');
 
 /* create the server */
 const app = express();
@@ -18,3 +19,8 @@ app.use('/', require('./path_router'));
 app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);
 });
+
+app.get('*', (request, response) =>{
+    response.status(404)
+    response.render('404-page', {title: 'Did you get lost??'})
+})
