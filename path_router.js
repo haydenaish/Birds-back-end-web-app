@@ -212,7 +212,7 @@ router.post('/birds/edit', async (req, res) => {
         // const photographerName = photographerRow[0].photographer;
     
 
-    
+
 
         if(req.files != null){
             const changeFile = `
@@ -271,7 +271,7 @@ router.post('/birds/edit', async (req, res) => {
     res.redirect('/birds');
 })
 
-router.get('/birds/:id/upload', async (req, res) => {
+router.get('/birds/:id/update', async (req, res) => {
     const id = req.params.id;
     conservation_status_data = []
     bird = []
