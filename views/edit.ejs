@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    <%- include('partials/sidebar', {status: status}) %>
+    <main id="birds">
+        <div>
+    <h2><%= bird.primary_name %></h2>
+    <form action="/birds/edit" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="bird_id" value="59">
+
+        <fieldset>
+            <legend>Common Names</legend>
+            <label for="primary_name">Primary Name</label>
+            <input type="text" name="primary_name" value="<%= bird.primary_name %>" required="">
+
+            <label for="english_name">English Name</label>
+            <input type="text" name="english_name" value="<%= bird.english_name %>" required="">
+        </fieldset>
+
+        <fieldset>
+            <legend>Taxonomy</legend>
+            <label for="scientific_name">Scientific Name</label>
+            <input type="text" name="scientific_name" value="<%= bird.scientific_name %>" required="">
+
+            <label for="order_name">Order</label>
+            <input type="text" name="order_name" value="<%= bird.order_name %>" required="">
+
+            <label for="family">Family</label>
+            <input type="text" name="family" value="<%= bird.family %>" required="">
+        </fieldset>
+
+        <fieldset>
+            <legend>Size</legend>
+            <label for="length">Length (cm)</label>
+            <input type="number" name="length" value="<%= bird.length %>">
+
+            <label for="weight">Weight (g)</label>
+            <input type="number" name="weight" value="<%= bird.weight %>">
+        </fieldset>
+
+        <fieldset>
+            <legend>Conservation</legend>
+            <label for="status_name">Status</label>
+            <select name="status_name" id="status">
+                <% for (const stat of status) { %>
+                <option value="<%= status.name %>" <%=bird.status_id===status.id ? 'selected' : '' %>><%=
+                status.name %>
+                </option>
+                <% } %>
+            </select>
+        </fieldset>
+
+        <fieldset>
+            <legend>Photo</legend>
+            <label for="photographer">Photo Credit</label>
+            <input type="text" name="photographer" value="<%= bird.photographer %>" required="">
+
+            <label for="photo_upload">Upload New Photo</label>
+            <input type="file" name="photo_upload" id="photo_upload">
+
+            <label for="photo_source">Photo Preview</label>
+            <img id="upload_preview" src="/images/<%= bird.filename %>" alt="Photo of Tīeke">
+            <input id="upload_source" type="text" name="photo_source" value="<%= bird.filename %>g" readonly="readonly">
+        </fieldset>
+
+        <button class="button" type="submit">Save Bird</button>
+    </form>
+</div>
+
+    </main>
+
+
+    <%- include('partials/footer') %>
+</body>
+</html>

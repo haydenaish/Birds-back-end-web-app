@@ -1,3 +1,4 @@
 node_modules/
 mysql-data/
 sql/mysql-data/
+.DS_Store
