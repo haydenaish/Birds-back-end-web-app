@@ -2,74 +2,96 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title><%= title %></title>
-<link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-<%- include('partials/header') %>
-<%- include('partials/sidebar', {status: status}) %>
-<main id="birds">
-<div>
-<h2></h2>
-<form action="/birds/create" method="POST" enctype="multipart/form-data">
-<fieldset>
-<legend>Common Names</legend>
-<label for="primary_name">Primary Name</label>
-<input type="text" name="primary_name" required=>
-<label for="english_name">English Name</label>
-<input type="text" name="english_name" required>
-</fieldset>
-<fieldset>
-<legend>Taxonomy</legend>
-<label for="scientific_name">Scientific Name</label>
-<input type="text" name="scientific_name" required>
-<label for="order_name">Order</label>
-<input type="text" name="order_name" required>
-<label for="family">Family</label>
-<input type="text" name="family" required>
-</fieldset>
-<fieldset>
-<legend>Size</legend>
-<label for="length">Length (cm)</label>
-<input type="number" name="length">
-<label for="weight">Weight (g)</label>
-<input type="number" name="weight">
-</fieldset>
-<fieldset>
-<legend>Conservation</legend>
-<label for="status_name">Status</label>
-<select name="status_name" id="status">
-<option value = "Not Threatened"> Not Threatened</option>
-<option value = "Naturally Uncommon">Naturally Uncommon</option>
-<option value = "Relict">Relict</option>
-<option value = "Recovering">Recovering</option>
-<option value = "Declining">Declining</option>
-<option value = "Nationally Increasing">Nationally Increasing</option>
-<option value = "Nationally Vulnerable">Nationally Vulnerable</option>
-<option value = "Nationally Endangered">Nationally Endangered</option>
-<option value = "Nationally Critical">Nationally Critical</option>
-<option value = "Extinct">Extinct</option>
-<option value = "Data Deficient">Data Deficient</option>
-</select>
-</fieldset>
-<fieldset>
-<legend>Photo</legend>
-<label for="photographer">Photo Credit</label>
-<input type="text" name="photographer" value="" required">
-<label for="photo_upload">Upload New Photo</label>
-<input type="file" name="photo_upload" id="photo_upload">
-<label for="photo_source">Photo Preview</label>
-<img id="upload_preview" src="" alt="Photo of ">
-<input id="upload_source" type="text" name="photo_source" value="" readonly="readonly">
-</fieldset>
-<button class="button" type="submit">Save Bird</button>
-</form>
-</div>
-</main>
-<%- include('partials/footer') %>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title><%= title %></title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <%- include('partials/header') %>
+        <%- include('partials/sidebar', {status: status}) %>
+    <main id="birds">
+        <div>
+            <h2></h2>
+            <form action="/birds/create" method="POST" enctype="multipart/form-data">
+                <fieldset>
+                    <legend>Common Names</legend>
+                    <label for="primary_name">Primary Name</label>
+                    <input type="text" name="primary_name" required=>
+                    <label for="english_name">English Name</label>
+                    <input type="text" name="english_name" required>
+                </fieldset>
+                <fieldset>
+                    <legend>Taxonomy</legend>
+                    <label for="scientific_name">Scientific Name</label>
+                    <input type="text" name="scientific_name" required>
+                    <label for="order_name">Order</label>
+                    <input type="text" name="order_name" required>
+                    <label for="family">Family</label>
+                    <input type="text" name="family" required>
+                </fieldset>
+                <fieldset>
+                    <legend>Size</legend>
+                    <label for="length">Length (cm)</label>
+                    <input type="number" name="length">
+                    <label for="weight">Weight (g)</label>
+                    <input type="number" name="weight">
+                </fieldset>
+                <fieldset>
+                    <legend>Conservation</legend>
+                    <label for="status_name">Status</label>
+                    <select name="status_name" id="status">
+                    <option value = "Not Threatened"> Not Threatened</option>
+                    <option value = "Naturally Uncommon">Naturally Uncommon</option>
+                    <option value = "Relict">Relict</option>
+                    <option value = "Recovering">Recovering</option>
+                    <option value = "Declining">Declining</option>
+                    <option value = "Nationally Increasing">Nationally Increasing</option>
+                    <option value = "Nationally Vulnerable">Nationally Vulnerable</option>
+                    <option value = "Nationally Endangered">Nationally Endangered</option>
+                    <option value = "Nationally Critical">Nationally Critical</option>
+                    <option value = "Extinct">Extinct</option>
+                    <option value = "Data Deficient">Data Deficient</option>
+                    </select>
+                </fieldset>
+                <fieldset>
+                    <legend>Photo</legend>
+                    <label for="photographer">Photo Credit</label>
+                    <input type="text" name="photographer" value="" required">
+                    <label for="photo_upload">Upload New Photo</label>
+                    <input type="file" name="photo_upload" id="photo_upload">
+                    <label for="photo_source">Photo Preview</label>
+                    <img id="upload_preview" src="" alt="Photo of ">
+                    <input id="upload_source" type="text" name="photo_source" value="" readonly="readonly">
+                </fieldset>
+                    <button class="button" type="submit">Save Bird</button>
+            </form>
+    </div>
+    </main>
+    <script>
+        document.getElementById('photo_upload').addEventListener('change', function (e) {
+            const fileInput = e.target;
+            const uploadPreview = document.getElementById('upload_preview');
+            const uploadSource = document.getElementById('upload_source');
+    
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+    
+                reader.onload = function (e) {
+                    uploadPreview.src = e.target.result; // Update the image preview
+                    uploadSource.value = fileInput.files[0].name; // Update the read-only input field
+                };
+    
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                uploadPreview.src = ''; // Clear the image preview if no file is selected
+                uploadSource.value = ''; // Clear the read-only input field
+            }
+        });
+    </script>
+      
+    <%- include('partials/footer') %>
+    </body>
 </html>
 
 

@@ -13,7 +13,7 @@
         <div>
     <h2><%= bird.primary_name %></h2>
     <form action="/birds/edit" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="bird_id" value="59">
+        <input type="hidden" name="bird_id" value="<%= bird.bird_id %>">
 
         <fieldset>
             <legend>Common Names</legend>
@@ -44,18 +44,24 @@
             <label for="weight">Weight (g)</label>
             <input type="number" name="weight" value="<%= bird.weight %>">
         </fieldset>
-
         <fieldset>
             <legend>Conservation</legend>
             <label for="status_name">Status</label>
             <select name="status_name" id="status">
-                <% for (const stat of status) { %>
-                <option value="<%= status.name %>" <%=bird.status_id===status.id ? 'selected' : '' %>><%=
-                status.name %>
-                </option>
-                <% } %>
+            <option value = "Not Threatened" <%= bird.status_name === 'Not Threatened' ? 'selected' : '' %>> Not Threatened</option>
+            <option value = "Naturally Uncommon" <%= bird.status_name === 'Naturally Uncommon' ? 'selected' : '' %>>Naturally Uncommon</option>
+            <option value = "Relict" <%= bird.status_name === 'Relict' ? 'selected' : '' %>>Relict</option>
+            <option value = "Recovering" <%= bird.status_name === 'Recovering' ? 'selected' : '' %>>Recovering</option>
+            <option value = "Declining" <%= bird.status_name === 'Declining' ? 'selected' : '' %>>Declining</option>
+            <option value = "Nationally Increasing" <%= bird.status_name === 'Nationally Increasing' ? 'selected' : '' %>>Nationally Increasing</option>
+            <option value = "Nationally Vulnerable" <%= bird.status_name === 'Nationally Vulnerable' ? 'selected' : '' %>>Nationally Vulnerable</option>
+            <option value = "Nationally Endangered" <%= bird.status_name === 'Nationally Endangered' ? 'selected' : '' %>>Nationally Endangered</option>
+            <option value = "Nationally Critical" <%= bird.status_name === 'Nationally Critical' ? 'selected' : '' %>>Nationally Critical</option>
+            <option value = "Extinct" <%= bird.status_name === 'Extinct' ? 'selected' : '' %>>Extinct</option>
+            <option value = "Data Deficient" <%= bird.status_name === 'Data Deficient' ? 'selected' : '' %>>Data Deficient</option>
             </select>
         </fieldset>
+        
 
         <fieldset>
             <legend>Photo</legend>
@@ -75,8 +81,27 @@
 </div>
 
     </main>
-
-
+    <script>
+        document.getElementById('photo_upload').addEventListener('change', function (e) {
+            const fileInput = e.target;
+            const uploadPreview = document.getElementById('upload_preview');
+            const uploadSource = document.getElementById('upload_source');
+    
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+    
+                reader.onload = function (e) {
+                    uploadPreview.src = e.target.result; // Update the image preview
+                    uploadSource.value = fileInput.files[0].name; // Update the read-only input field
+                };
+    
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                uploadPreview.src = ''; // Clear the image preview if no file is selected
+                uploadSource.value = ''; // Clear the read-only input field
+            }
+        });
+    </script>
     <%- include('partials/footer') %>
 </body>
 </html>

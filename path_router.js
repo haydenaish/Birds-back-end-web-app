@@ -1,8 +1,13 @@
 const express = require('express');
 const pool = require('./db');
 router = express.Router();
+const fileUpload = require('express-fileupload')
 const bodyParser = require('body-parser')
 router.use(bodyParser.urlencoded({extended:false}))
+router.use(fileUpload())
+const path = require('path');
+
+const uploadDirectory = 'public/images/uploads';
 
 router.get('/', async (req, res) => {
     res.redirect('/birds')
@@ -47,11 +52,9 @@ router.get('/birds/create/', async (req, res) =>{
     res.render('create',{title: "Create A Bird", status:conservation_status_data})
 })
 
-
     
 
-router.post('/birds/create', (req, res) => {
-    // const primary_name = req.bo
+router.post('/birds/create', async (req, res) => {
     
     const {
         primary_name,
@@ -64,18 +67,9 @@ router.post('/birds/create', (req, res) => {
         status_name,
         photographer,
         } = req.body;
-
-
-        console.log(primary_name)
-        console.log(english_name)
-        console.log(scientific_name)
-        console.log(order_name)
-        console.log(family)
-        console.log(length)
-        console.log(weight)
-        console.log(photographer)
-        // res.redirect('/birds');
-    // });
+    
+        const filename = req.files.photo_upload.name
+        const photo_file = req.files.photo_upload
 
     const statusQuery = `SELECT status_id FROM ConservationStatus WHERE status_name = ?;`
     const insertBirdQuery = `INSERT INTO Bird (primary_name, english_name, scientific_name, order_name, family, length, weight, status_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`;
@@ -84,13 +78,12 @@ router.post('/birds/create', (req, res) => {
     const db = pool.promise();
 
     try {
-        // Insert bird data into the Birds table
-        const [statusRow] = db.query(statusQuery, [status_name]);
+        const [statusRow] = await db.query(statusQuery, [status_name]);
 
-        if (statusRow.length === 1) {
             const status_id = statusRow[0].status_id;
+            // console.log(status_id)
 
-            const [insertedBirdRow] = db.query(insertBirdQuery, [
+            const [insertedBirdRow] = await db.query(insertBirdQuery, [
                 primary_name,
                 english_name,
                 scientific_name,
@@ -98,22 +91,27 @@ router.post('/birds/create', (req, res) => {
                 family,
                 length,
                 weight,
-                status_id // Use the status_id
+                status_id
             ]);
 
-        // Insert photo data into the Photos table
-        const [insertedPhotoRow] = db.query(insertPhotoQuery, [
-            photographer,
-            photo_source, // Assuming photo_source is the filename
-            insertedBirdRow.insertId // Use the ID of the newly inserted bird
-        ]);
-        
-        } else {
-            console.error(`Status with name ${status_name} not found.`);
-            res.status(404).send('Status not found');
-        }
+ 
+        const bird_id = insertedBirdRow.insertId
 
-        res.redirect('/birds'); // Redirect to a page after successful submission
+
+        const [insertedPhotoRow] = await db.query(insertPhotoQuery, [
+            photographer,
+            filename,
+            bird_id 
+        ]);
+
+        photo_file.mv(path.join(__dirname, 'public/images', filename), (err) => {
+            if (err) {
+                console.error("Error saving image:", err);
+                res.status(500).send("Error saving image.");
+                return;
+            }
+        });
+        res.redirect('/birds');
     } catch (err) {
         console.error('Error inserting bird data:', err);
         res.status(500).send('Error inserting bird data');
@@ -150,6 +148,129 @@ router.get('/birds/:id', async (req, res) => {
     res.render('bird_page', {title: "Birds of Aotearoa", bird: bird[0], status: conservation_status_data});
 })
 
+router.post('/birds/edit', async (req, res) => {
+    const {
+        primary_name,
+        english_name,
+        scientific_name,
+        order_name,
+        family,
+        length,
+        weight,
+        status_name,
+        photographer,
+        } = req.body;
+
+    const bird_id = req.body.bird_id
+
+    // console.log(primary_name)
+    // console.log(english_name)
+    // console.log(scientific_name)
+    // console.log(order_name)
+    // console.log(family)
+    // console.log(length)
+    // console.log(weight)
+    // console.log(status_name)
+    // console.log(photographer)
+    // console.log(bird_id)
+
+    const statusQuery = `SELECT status_id FROM ConservationStatus WHERE status_name = ?;`
+    const photographerQuery = `SELECT photographer FROM Photos WHERE bird_id = ?;`
+    const updateBirdQuery = `
+    UPDATE Bird
+    SET
+        primary_name = ?,
+        english_name = ?,
+        scientific_name = ?,
+        order_name = ?,
+        family = ?,
+        length = ?,
+        weight = ?,
+        status_id = ?
+    WHERE
+        bird_id = ?;`;
+
+    const db = pool.promise();
+    try {
+        const [statusRow] = await db.query(statusQuery, [status_name]);
+
+            const status_id = statusRow[0].status_id;
+            const values = [
+                primary_name,
+                english_name,
+                scientific_name,
+                order_name,
+                family,
+                length,
+                weight,
+                status_id,
+                bird_id // Replace this with the actual bird ID
+            ];
+        const [updateResult] = await db.query(updateBirdQuery, values);
+        
+        // const [photographerRow] = await db.query(photographerQuery, [bird_id]);
+        // const photographerName = photographerRow[0].photographer;
+    
+
+    
+
+        if(req.files != null){
+            const changeFile = `
+            UPDATE photos
+            SET
+            photographer = ?,
+            filename = ?
+            WHERE
+                bird_id = ?;`;
+            const filename = req.files.photo_upload.name
+            const photo_file = req.files.photo_upload
+            const values2 = [
+                photographer,
+                filename,
+                bird_id
+                
+            ]
+            const [updateFile] = await db.query(changeFile, values2)
+
+            photo_file.mv(path.join(__dirname, 'public/images', filename), (err) => {
+                if (err) {
+                    console.error("Error saving image:", err);
+                    res.status(500).send("Error saving image.");
+                    return;
+                }
+            });
+        }else{
+            const updatePhotographer = `
+            UPDATE photos
+            SET
+            photographer = ?
+            WHERE
+                bird_id = ?;`;
+            const values3 = [
+                photographer,
+                bird_id
+            ]
+            const [updatePhoto] = await db.query(updatePhotographer, values3)
+        }
+        
+     } catch (err) {
+        console.error('Error updating bird data:', err);
+        res.status(500).send('Error updating bird data');
+    }
+
+    let filename;
+    let photo_file;
+    if(req.files != null){
+        filename = req.files.photo_upload.name
+        photo_file = req.files.photo_upload
+
+    }
+    // console.log(filename)
+    // console.log(photo_file)
+
+    res.redirect('/birds');
+})
+
 router.get('/birds/:id/upload', async (req, res) => {
     const id = req.params.id;
     conservation_status_data = []
@@ -166,6 +287,8 @@ router.get('/birds/:id/upload', async (req, res) => {
         conservation_status_data = status_row;
         const [bird_rows, bird_fields] = await db.query(birds_query, id);
         bird = bird_rows
+        // console.log(bird)
+        // console.log(conservation_status_data)
     } catch (err) {
         console.error("Error with code you have just implemented");
     }
